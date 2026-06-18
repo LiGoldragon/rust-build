@@ -24,14 +24,14 @@ let
 
   directoryBaseName = path: builtins.baseNameOf (toString path);
 in
-{
+rec {
   inherit defaultPrunedDirectoryNames defaultToolchainComponents;
 
-  fromPkgs =
+  fromPkgsWithToolchain =
     pkgs:
+    toolchain:
     let
       lib = pkgs.lib;
-      toolchain = fenix.packages.${system}.stable.withComponents defaultToolchainComponents;
       craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
       prunedSourceDirectory =
@@ -78,4 +78,19 @@ in
         toolchain
         ;
     };
+
+  fromToolchainFile =
+    pkgs:
+    toolchainFile:
+    let
+      toolchain = fenix.packages.${system}.fromToolchainFile toolchainFile;
+    in
+    fromPkgsWithToolchain pkgs toolchain;
+
+  fromPkgs =
+    pkgs:
+    let
+      toolchain = fenix.packages.${system}.stable.withComponents defaultToolchainComponents;
+    in
+    fromPkgsWithToolchain pkgs toolchain;
 }
