@@ -79,18 +79,26 @@ rec {
         ;
     };
 
+  # The cluster Rust toolchain is the newest nightly (psyche intent: new
+  # language features, not stable). It is pinned durably via fenix's flake
+  # lock — bump fenix here to advance Rust cluster-wide — rather than a
+  # rolling channel guarded by a per-crate frozen hash that goes stale on
+  # every release. `toolchainFile` (a `{ file; sha256 }` from callers) is kept
+  # for call-compatibility but intentionally unused: the channel/hash in it no
+  # longer drives the toolchain, so existing `fromToolchainFile` call sites get
+  # nightly by merely repinning rust-build, with no flake.nix edit.
   fromToolchainFile =
     pkgs:
     toolchainFile:
     let
-      toolchain = fenix.packages.${system}.fromToolchainFile toolchainFile;
+      toolchain = fenix.packages.${system}.complete.withComponents defaultToolchainComponents;
     in
     fromPkgsWithToolchain pkgs toolchain;
 
   fromPkgs =
     pkgs:
     let
-      toolchain = fenix.packages.${system}.stable.withComponents defaultToolchainComponents;
+      toolchain = fenix.packages.${system}.complete.withComponents defaultToolchainComponents;
     in
     fromPkgsWithToolchain pkgs toolchain;
 }
