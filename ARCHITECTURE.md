@@ -2,6 +2,12 @@
 
 rust-build exports a per-system library at `lib.${system}`.
 
+## Direction
+
+`rust-build` is the shared Nix build policy flake for LiGoldragon Rust repositories. Its primary purpose is source hygiene: Rust builds must not traverse heavyweight local cache and history directories — `target`, `.git`, `.jj`, `.direnv`, `node_modules` — while constructing Nix sources.
+
+Consumers use `rust-build` for the standard Rust toolchain, Crane library, and source-cleaning helpers, layering repo-specific source extras through explicit extra filters. Raw project flakes should not call `craneLib.cleanCargoSource` or `craneLib.filterCargoSources` directly when `rust-build` is available.
+
 Consumers call:
 
 ```nix
